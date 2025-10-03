@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+nix_installed=true
 direnv_installed=true
 
 # Install nix if needed
@@ -8,6 +9,7 @@ if ! command -v nix >/dev/null 2>&1; then
   echo "Installing nix..."
   curl -fsSL https://install.determinate.systems/nix | sh -s -- install --determinate
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  nix_installed=false
 else
   echo "nix already installed"
 fi
@@ -31,36 +33,47 @@ else
   echo "nix-direnv already installed"
 fi
 
-# Print shell hook message if direnv was just installed
-if [ "$direnv_installed" = false ]; then
+# Print instructions
+direnv_installed=false
+nix_installed=false
+if [ "$direnv_installed" = false ] || [ "$nix_installed" = false ]; then
   echo
   echo "=========================================="
-  echo "direnv installed successfully!"
-  echo
-  echo "Add the following to your shell config:"
+  echo "Success!"
   echo
 
-  case "${SHELL##*/}" in
-    bash)
-      echo '  ~/.bashrc:'
-      echo '  eval "$(direnv hook bash)"'
-      ;;
-    zsh)
-      echo '  ~/.zshrc:'
-      echo '  eval "$(direnv hook zsh)"'
-      ;;
-    fish)
-      echo '  ~/.config/fish/config.fish:'
-      echo '  direnv hook fish | source'
-      ;;
-    tcsh|csh)
-      echo '  ~/.cshrc:'
-      echo '  eval `direnv hook tcsh`'
-      ;;
-    *)
-      echo "  See: https://direnv.net/docs/hook.html"
-      ;;
-  esac
+  if [ "$direnv_installed" = false ]; then
+    echo "Now add the direnv hook to your shell config:"
+    echo
+    case "${SHELL##*/}" in
+      bash)
+        printf '  \033[1mecho '\''eval "$(direnv hook bash)"'\'' >> ~/.bashrc\033[0m\n'
+        ;;
+      zsh)
+        printf '  \033[1mecho '\''eval "$(direnv hook zsh)"'\'' >> ~/.zshrc\033[0m\n'
+        ;;
+      fish)
+        printf '  \033[1mecho '\''direnv hook fish | source'\'' >> ~/.config/fish/config.fish\033[0m\n'
+        ;;
+      tcsh|csh)
+        printf '  \033[1mecho '\''eval `direnv hook tcsh`'\'' >> ~/.cshrc\033[0m\n'
+        ;;
+      *)
+        echo '  See: https://direnv.net/docs/hook.html'
+        ;;
+    esac
+  fi
+
+  if [ "$nix_installed" = false ]; then
+    if [ "$direnv_installed" = false ]; then
+      echo
+      echo "Then open a new shell or run:"
+    else
+      echo "Now open a new shell or run:"
+    fi
+    echo
+    printf '  \033[1m. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh\033[0m\n'
+  fi
 
   echo "=========================================="
 else
