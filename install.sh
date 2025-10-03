@@ -15,7 +15,7 @@ fi
 # Install direnv if needed
 if ! command -v direnv >/dev/null 2>&1; then
   echo "Installing direnv..."
-  nix profile install nixpkgs#direnv
+  nix profile add nixpkgs#direnv
   direnv_installed=false
 else
   echo "direnv already installed"
@@ -24,7 +24,7 @@ fi
 # Install nix-direnv if needed
 if ! grep -q nix-direnv "$HOME/.config/direnv/direnvrc" 2>/dev/null; then
   echo "Installing nix-direnv..."
-  nix profile install nixpkgs#nix-direnv
+  nix profile add nixpkgs#nix-direnv
   mkdir -p "$HOME/.config/direnv"
   echo 'source $HOME/.nix-profile/share/nix-direnv/direnvrc' > "$HOME/.config/direnv/direnvrc"
 else
