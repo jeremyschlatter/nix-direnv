@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 direnv_installed=true
 
 # Install nix if needed
-if ! command -v nix &>/dev/null; then
+if ! command -v nix >/dev/null 2>&1; then
   echo "Installing nix..."
   curl -fsSL https://install.determinate.systems/nix | sh -s -- install --determinate
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -13,7 +13,7 @@ else
 fi
 
 # Install direnv if needed
-if ! command -v direnv &>/dev/null; then
+if ! command -v direnv >/dev/null 2>&1; then
   echo "Installing direnv..."
   nix profile install nixpkgs#direnv
   direnv_installed=false
